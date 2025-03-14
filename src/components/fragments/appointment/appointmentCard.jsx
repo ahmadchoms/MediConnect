@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import handleDownloadInvoice from "@/utils/generateIinvoicePDF";
 import { CalendarCheck, MoreHorizontal } from "lucide-react";
@@ -5,8 +7,24 @@ import StatusBadge from "./statusBadge";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import AppointmentDetailModal from "./appointmentModal";
+import { useEffect, useState } from "react";
+import { firebaseService } from "@/lib/firebase/service";
 
 const AppointmentCard = ({ appointment, formatDate }) => {
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await firebaseService.getDocumentById("users", appointment.userId);
+                setUser(userData);
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+            }
+        };
+
+        fetchUserData();
+    }, [appointment.userId]);
     return (
         <Card className="p-4 md:p-6">
             <CardHeader className="flex flex-col md:flex-row md:items-center justify-between space-y-2 md:space-y-0 pb-4">
@@ -54,7 +72,7 @@ const AppointmentCard = ({ appointment, formatDate }) => {
                         <AppointmentDetailModal appointment={appointment} />
                     </AlertDialog>
 
-                    <Button className="w-full md:flex-1" onClick={() => handleDownloadInvoice(appointment)}>
+                    <Button className="w-full md:flex-1" onClick={() => handleDownloadInvoice(appointment, user)}>
                         Unduh Invoice Janji Temu
                     </Button>
                 </div>

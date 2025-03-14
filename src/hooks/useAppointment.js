@@ -10,6 +10,7 @@ export const useAppointment = (doctors, doctorId) => {
   const [appointments, setAppointments] = useState([]);
   const [userId, setUserId] = useState("");
   const { data: session } = useSession();
+  console.log(appointments);
 
   useEffect(() => {
     const fetchData = async () => {
