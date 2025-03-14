@@ -49,3 +49,7 @@ export async function middleware(request) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/", "/profile/:path*", "/auth/:path*", "/admin/:path*"],
+};
