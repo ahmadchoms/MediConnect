@@ -21,7 +21,7 @@ import { useSession } from "next-auth/react";
 import SkeletonUserLoading from "@/components/fragments/skeletonUserLoading";
 import { firebaseService } from "@/lib/firebase/service";
 
-export default function AppointmentPage() {
+function AppointmentPageContent() {
   const searchParams = useSearchParams();
   const doctorId = searchParams.get("doctor") || "";
 
@@ -29,8 +29,8 @@ export default function AppointmentPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState("");
-  const { data: session, status } = useSession()
-  const patientName = session?.user?.name
+  const { data: session, status } = useSession();
+  const patientName = session?.user?.name;
 
   const {
     selectedDoctor,
@@ -53,11 +53,16 @@ export default function AppointmentPage() {
     const fetchUserId = async () => {
       if (!session?.user?.name) return;
 
-      const querySnapshot = await firebaseService.queryDocument("users", "name", session.user.name);
+      try {
+        const querySnapshot = await firebaseService.queryDocument("users", "name", session.user.name);
 
-      if (querySnapshot.length !== 0) {
-        const userDoc = querySnapshot[0];
-        setUserId(userDoc.id);
+        if (querySnapshot.length !== 0) {
+          const userDoc = querySnapshot[0];
+          setUserId(userDoc.id);
+        }
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+        setError("Failed to fetch user ID");
       }
     };
 
@@ -110,84 +115,90 @@ export default function AppointmentPage() {
     }
   };
 
-  if (status === "loading") return <SkeletonUserLoading />
+  if (status === "loading") return <SkeletonUserLoading />;
 
   return (
-    <Suspense fallback={<SkeletonUserLoading />}>
-      <main>
-        <HeroSection title="Buat Janji Dengan Dokter Kami">
-          Lakukan reservasi untuk konsultasi dengan dokter pilihan Anda dengan mudah dan cepat.
-        </HeroSection>
-        <section className="py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {!submitted ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="overflow-hidden">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Form Reservasi</CardTitle>
-                      <div className="flex gap-1 text-sm">
-                        <StepBadge step={step} many={1} />
-                        <StepBadge step={step} many={2} />
-                        <StepBadge step={step} many={3} />
-                      </div>
+    <main>
+      <HeroSection title="Buat Janji Dengan Dokter Kami">
+        Lakukan reservasi untuk konsultasi dengan dokter pilihan Anda dengan mudah dan cepat.
+      </HeroSection>
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {!submitted ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="overflow-hidden">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Form Reservasi</CardTitle>
+                    <div className="flex gap-1 text-sm">
+                      <StepBadge step={step} many={1} />
+                      <StepBadge step={step} many={2} />
+                      <StepBadge step={step} many={3} />
                     </div>
-                    <CardDescription>
-                      {step === 1 && "Pilih dokter dan jadwal kunjungan"}
-                      {step === 2 && "Pilih tanggal dan waktu kunjungan"}
-                      {step === 3 && "Lengkapi informasi pribadi Anda"}
-                      {error && <p className="text-red-500">{error}</p>}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <Form {...form}>
-                      <form
-                        onSubmit={form.handleSubmit(handleRequestAppointment)}
-                        className="space-y-6"
-                      >
-                        {step === 1 && (
-                          <DoctorSelectionStep
-                            form={form}
-                            doctors={doctors}
-                            selectedDoctor={selectedDoctor}
-                            handleDoctorChange={handleDoctorChange}
-                            setStep={setStep}
-                          />
-                        )}
+                  </div>
+                  <CardDescription>
+                    {step === 1 && "Pilih dokter dan jadwal kunjungan"}
+                    {step === 2 && "Pilih tanggal dan waktu kunjungan"}
+                    {step === 3 && "Lengkapi informasi pribadi Anda"}
+                    {error && <p className="text-red-500">{error}</p>}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(handleRequestAppointment)}
+                      className="space-y-6"
+                    >
+                      {step === 1 && (
+                        <DoctorSelectionStep
+                          form={form}
+                          doctors={doctors}
+                          selectedDoctor={selectedDoctor}
+                          handleDoctorChange={handleDoctorChange}
+                          setStep={setStep}
+                        />
+                      )}
 
-                        {step === 2 && (
-                          <DateTimeSelectionStep
-                            form={form}
-                            selectedDate={selectedDate}
-                            availableTimes={availableTimes}
-                            isDateAvailable={isDateAvailable}
-                            setStep={setStep}
-                          />
-                        )}
+                      {step === 2 && (
+                        <DateTimeSelectionStep
+                          form={form}
+                          selectedDate={selectedDate}
+                          availableTimes={availableTimes}
+                          isDateAvailable={isDateAvailable}
+                          setStep={setStep}
+                        />
+                      )}
 
-                        {step === 3 && (
-                          <AppointmentConfirmationStep
-                            form={form}
-                            selectedDoctor={selectedDoctor}
-                            selectedDate={selectedDate}
-                            setStep={setStep}
-                          />
-                        )}
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <SuccessMessage />
-            )}
-          </div>
-        </section>
-      </main>
+                      {step === 3 && (
+                        <AppointmentConfirmationStep
+                          form={form}
+                          selectedDoctor={selectedDoctor}
+                          selectedDate={selectedDate}
+                          setStep={setStep}
+                        />
+                      )}
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <SuccessMessage />
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export default function AppointmentPage() {
+  return (
+    <Suspense fallback={<SkeletonUserLoading />}>
+      <AppointmentPageContent />
     </Suspense>
   );
 }

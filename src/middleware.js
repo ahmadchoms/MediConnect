@@ -34,27 +34,27 @@ export async function middleware(request) {
 
     return NextResponse.next();
   }
-  // if (isAdminPath) {
-  //   if (!token) {
-  //     const redirectUrl = new URL("/auth/signin", request.url);
-  //     redirectUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
-  //     return NextResponse.redirect(redirectUrl);
-  //   }
+  if (isAdminPath) {
+    if (!token) {
+      const redirectUrl = new URL("/auth/signin", request.url);
+      redirectUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
 
-  //   if (token.role !== "admin") {
-  //     return NextResponse.redirect(new URL("/", request.url));
-  //   }
+    if (token.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
 
-  //   if (pathname === "/admin") {
-  //     return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  //   }
+    if (pathname === "/admin") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
 
-  //   return NextResponse.next();
-  // } else {
-  //   if (token.role === "admin") {
-  //     return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  //   }
-  // }
+    return NextResponse.next();
+  } else {
+    if (token.role === "admin") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+  }
 
   if (!token) {
     const redirectUrl = new URL("/auth/signin", request.url);
