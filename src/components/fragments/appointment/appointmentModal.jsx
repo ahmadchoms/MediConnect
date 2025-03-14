@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import handleDownloadInvoice from "@/utils/generateIinvoicePDF";
 import { toRupiah } from "@/utils/formatToRupiah";
 
-const AppointmentDetailModal = ({ appointment }) => {
+const AppointmentDetailModal = ({ appointment, user }) => {
     if (!appointment) return null;
 
     const totalFee = appointment.appointmentFee + appointment.handlingFee + appointment.medicationFee;
@@ -73,7 +73,7 @@ const AppointmentDetailModal = ({ appointment }) => {
 
             <AlertDialogFooter>
                 <AlertDialogCancel>Tutup</AlertDialogCancel>
-                <Button onClick={() => handleDownloadInvoice(appointment)}>
+                <Button onClick={() => handleDownloadInvoice(appointment, user)}>
                     Cetak Invoice
                 </Button>
             </AlertDialogFooter>

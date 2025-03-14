@@ -69,7 +69,7 @@ const AppointmentCard = ({ appointment, formatDate }) => {
                                 Lihat Detail Janji Temu
                             </Button>
                         </AlertDialogTrigger>
-                        <AppointmentDetailModal appointment={appointment} />
+                        <AppointmentDetailModal appointment={appointment} user={user} />
                     </AlertDialog>
 
                     <Button className="w-full md:flex-1" onClick={() => handleDownloadInvoice(appointment, user)}>
