@@ -1,17 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DoctorCard from "@/components/fragments/doctor/doctorCard";
-import { doctors } from "@/dummy/data";
+import { toast } from "sonner";
+import { firebaseService } from "@/lib/firebase/service";
 
 export default function DoctorListSection() {
     const [activeTab, setActiveTab] = useState("all");
+    const [doctorsList, setDoctorsList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchDoctors = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await firebaseService.getData("doctors");
+            setDoctorsList(response);
+        } catch {
+            toast.error("Gagal memuat data dokter");
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchDoctors();
+    }, [fetchDoctors]);
+
+    console.log(doctorsList)
 
     const filteredDoctors =
         activeTab === "all"
-            ? doctors
-            : doctors.filter((doctor) => doctor.categories.includes(activeTab));
+            ? doctorsList
+            : doctorsList.filter((doctor) => doctor.categories.includes(activeTab));
 
     return (
         <section className="py-16">

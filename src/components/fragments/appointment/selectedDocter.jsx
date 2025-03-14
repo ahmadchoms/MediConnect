@@ -63,7 +63,7 @@ const DoctorSelectionStep = ({
               <div key={idx} className="flex gap-2 items-center text-sm">
                 <CalendarDays className="h-4 w-4 text-blue-600" />
                 <span className="text-gray-700">{item.day}:</span>
-                <span className="text-gray-900">{item.time}</span>
+                <span className="text-gray-900">{item.startTime} - {item.endTime}</span>
               </div>
             ))}
           </div>

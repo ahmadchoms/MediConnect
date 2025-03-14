@@ -70,20 +70,21 @@ export const useAppointment = (doctors, doctorId) => {
 
     if (!doctorSchedule) return [];
 
-    const [startTimeStr, endTimeStr] = doctorSchedule.time.split(" - ");
-    const [startHour, startMinute] = startTimeStr.split(":").map(Number);
-    const [endHour, endMinute] = endTimeStr.split(":").map(Number);
+    const [startHour, startMinute] = doctorSchedule.startTime
+      .split(":")
+      .map(Number);
+    const [endHour, endMinute] = doctorSchedule.endTime.split(":").map(Number);
 
-    const startTime = new Date();
-    startTime.setHours(startHour, startMinute, 0);
+    const startTime = new Date(date);
+    startTime.setHours(startHour, startMinute, 0, 0);
 
-    const endTime = new Date();
-    endTime.setHours(endHour, endMinute, 0);
+    const endTime = new Date(date);
+    endTime.setHours(endHour, endMinute, 0, 0);
 
     return availableTimeSlots.filter((timeSlot) => {
       const [slotHour, slotMinute] = timeSlot.split(":").map(Number);
-      const slotTime = new Date();
-      slotTime.setHours(slotHour, slotMinute, 0);
+      const slotTime = new Date(date);
+      slotTime.setHours(slotHour, slotMinute, 0, 0);
 
       return slotTime >= startTime && slotTime < endTime;
     });

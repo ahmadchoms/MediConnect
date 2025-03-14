@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,6 @@ import { useAppointment } from "@/hooks/useAppointment";
 import DoctorSelectionStep from "@/components/fragments/appointment/selectedDocter";
 import DateTimeSelectionStep from "@/components/fragments/appointment/selectedDate";
 import AppointmentConfirmationStep from "@/components/fragments/appointment/formConfirmation";
-import { doctors } from "@/dummy/data";
 import { SuccessMessage } from "@/components/fragments/appointment/cardSuccessMessage";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,15 +28,15 @@ function AppointmentPageContent() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState("");
+  const [doctorsList, setDoctorsList] = useState([]);
   const { data: session, status } = useSession();
-  const patientName = session?.user?.name;
 
   const {
     selectedDoctor,
     setSelectedDoctor,
     isDateAvailable,
     getAvailableTimesForDate,
-  } = useAppointment(doctors, doctorId);
+  } = useAppointment(doctorsList, doctorId);
 
   const form = useForm({
     resolver: zodResolver(appointmentFormSchema),
@@ -49,12 +48,25 @@ function AppointmentPageContent() {
     },
   });
 
+  const fetchDoctors = useCallback(async () => {
+    try {
+      const response = await firebaseService.getData("doctors");
+      setDoctorsList(response);
+    } catch {
+      toast.error("Gagal memuat data dokter");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
+
   useEffect(() => {
     const fetchUserId = async () => {
       if (!session?.user?.name) return;
 
       try {
-        const querySnapshot = await firebaseService.queryDocument("users", "name", session.user.name);
+        const querySnapshot = await firebaseService.queryDocument("users", "name", session?.user?.name);
 
         if (querySnapshot.length !== 0) {
           const userDoc = querySnapshot[0];
@@ -73,7 +85,7 @@ function AppointmentPageContent() {
   const availableTimes = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
 
   const handleDoctorChange = (value) => {
-    const doctor = doctors.find((d) => d.id.toString() === value);
+    const doctor = doctorsList.find((d) => d.id.toString() === value);
     setSelectedDoctor(doctor);
     form.setValue("doctorId", value);
   };
@@ -156,7 +168,7 @@ function AppointmentPageContent() {
                       {step === 1 && (
                         <DoctorSelectionStep
                           form={form}
-                          doctors={doctors}
+                          doctors={doctorsList}
                           selectedDoctor={selectedDoctor}
                           handleDoctorChange={handleDoctorChange}
                           setStep={setStep}

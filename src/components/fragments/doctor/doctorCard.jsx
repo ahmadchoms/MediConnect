@@ -1,10 +1,26 @@
-import Link from "next/link";
-import { Button } from "../../ui/button";
 import { motion } from "framer-motion";
 import { Badge } from "../../ui/badge";
-import { Calendar } from "lucide-react";
 
 export default function DoctorCard({ doctor, index }) {
+  const specialties = [
+    { value: "anak", label: "Anak" },
+    { value: "gigi", label: "Gigi" },
+    { value: "kandungan", label: "Kandungan (Obstetri & Ginekologi)" },
+    { value: "mata", label: "Mata" },
+    { value: "tht", label: "Telinga, Hidung, Tenggorokan (THT)" },
+    { value: "kulit", label: "Kulit & Kelamin" },
+    { value: "saraf", label: "Saraf" },
+    { value: "dalam", label: "Penyakit Dalam" },
+    { value: "paru", label: "Paru" },
+    { value: "jantung", label: "Jantung & Pembuluh Darah" },
+    { value: "gizi", label: "Gizi Klinik" },
+    { value: "psikologi", label: "Psikologi Klinis" },
+    { value: "fisioterapi", label: "Fisioterapi" },
+    { value: "rehabilitasi", label: "Rehabilitasi Medik" },
+  ];
+
+  const capsSpecialty = specialties.find((caps) => caps.value === doctor.specialty);
+  const displaySpecialty = capsSpecialty ? capsSpecialty.label : doctor.specialty;
   return (
     <motion.div
       className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
@@ -15,7 +31,7 @@ export default function DoctorCard({ doctor, index }) {
     >
       <div className="relative">
         <img
-          src={doctor.image}
+          src={"/dr-budi.jpg"}
           alt={doctor.name}
           className="w-full h-56 object-cover"
           onError={(e) => {
@@ -33,7 +49,7 @@ export default function DoctorCard({ doctor, index }) {
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
           {doctor.name}
         </h3>
-        <p className="text-blue-600 mb-4">{doctor.specialty}</p>
+        <p className="text-blue-600 mb-4">{displaySpecialty}</p>
 
         <h4 className="text-sm font-medium text-gray-900 mb-2">
           Jadwal Praktik:
@@ -42,17 +58,11 @@ export default function DoctorCard({ doctor, index }) {
           {doctor.schedule.map((item, idx) => (
             <div key={idx} className="flex justify-between text-sm">
               <span className="text-gray-600">{item.day}</span>
-              <span className="text-gray-900">{item.time}</span>
+              <span className="text-gray-900">{item.startTime} - {item.endTime}</span>
             </div>
           ))}
         </div>
 
-        <Link href={`/appointments?doctor=${doctor.id}`}>
-          <Button className="w-full bg-blue-600 hover:bg-blue-700">
-            <Calendar className="mr-2 h-4 w-4" />
-            Buat Janji
-          </Button>
-        </Link>
       </div>
     </motion.div>
   );
